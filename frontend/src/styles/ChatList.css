@@ -1,0 +1,29 @@
+.chat-list-container {
+  max-width: 400px;
+  margin: 40px auto;
+  background: #fff;
+  border-radius: 1.2rem;
+  box-shadow: 0 4px 24px 0 rgba(80, 112, 255, 0.08);
+  overflow: hidden;
+}
+
+.chat-list-header {
+  background: linear-gradient(90deg, #6366f1 0%, #818cf8 100%);
+  color: #fff;
+  padding: 1.2rem 1.5rem;
+  font-size: 1.3rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.chat-list-items {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.chat-list-empty {
+  text-align: center;
+  color: #6366f1;
+  padding: 2rem 0;
+  font-size: 1.1rem;
+}

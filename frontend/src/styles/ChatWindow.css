@@ -1,0 +1,112 @@
+.typing-indicator {
+  font-style: italic;
+  color: #888;
+  margin: 8px 0 0 8px;
+  font-size: 15px;
+  letter-spacing: 1px;
+  animation: typing-blink 1s steps(1) infinite;
+}
+
+@keyframes typing-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+/* MessageItem styles */
+.message-item {
+  text-align: left;
+  margin: 10px 0;
+}
+.message-item.mine {
+  text-align: right;
+}
+.message-bubble {
+  display: inline-block;
+  padding: 10px;
+  border-radius: 8px;
+  background: #fff;
+  max-width: 70%;
+  border: 1px solid #ddd;
+}
+.message-bubble.mine {
+  background: #DCF8C6;
+}
+.message-you {
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 2px;
+}
+.message-image {
+  max-width: 200px;
+  max-height: 200px;
+  border-radius: 8px;
+  display: block;
+}
+.message-video {
+  max-width: 250px;
+  border-radius: 8px;
+  display: block;
+}
+.message-download-link {
+  color: blue;
+  text-decoration: underline;
+}
+.chat-window-container {
+  display: flex;
+  flex-direction: column;
+  height: 90vh;
+  max-width: 600px;
+  margin: 30px auto;
+  background: #fff;
+  border-radius: 1.2rem;
+  box-shadow: 0 4px 24px 0 rgba(80, 112, 255, 0.08);
+  overflow: hidden;
+}
+
+.chat-window-header {
+  background: linear-gradient(90deg, #6366f1 0%, #818cf8 100%);
+  color: #fff;
+  padding: 1.2rem 1.5rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+  text-align: left;
+}
+
+.chat-window-messages {
+  flex: 1;
+  padding: 1.2rem;
+  overflow-y: auto;
+  background: #f8fafc;
+}
+
+.chat-window-input {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  border-top: 1px solid #e5e7eb;
+  background: #f3f4f6;
+}
+
+.chat-window-input input[type="text"] {
+  flex: 1;
+  padding: 0.7rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.6rem;
+  font-size: 1rem;
+  outline: none;
+  margin-right: 0.7rem;
+}
+
+.chat-window-input button {
+  padding: 0.7rem 1.5rem;
+  background: linear-gradient(90deg, #6366f1 0%, #818cf8 100%);
+  color: #fff;
+  border: none;
+  border-radius: 0.6rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.chat-window-input button:hover {
+  background: linear-gradient(90deg, #818cf8 0%, #6366f1 100%);
+}
