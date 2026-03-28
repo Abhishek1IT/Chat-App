@@ -12,7 +12,8 @@ This project is a full-stack real-time chat application with user authentication
   - User registration and login
   - JWT authentication
   - View all users (except yourself)
-  - Real-time chat with other users
+   - Real-time chat with other users
+   - Typing indicator (see when the other user is typing)
   - Profile management
   - Password reset (forgot/reset)
   - Responsive UI
@@ -50,7 +51,22 @@ The app will run at [http://localhost:3000](http://localhost:3000).
 - **Features:**
   - User registration and login (JWT authentication)
   - User profile and list
-  - Real-time chat with Socket.IO
+   - Real-time chat with Socket.IO
+   - Typing indicator (shows "typing..." when the other user is typing)
+## Typing Indicator Feature
+
+This app supports a real-time typing indicator:
+
+- When one user is typing in a chat, the other user will see a "typing..." message below the chat messages.
+- This works only if both users are in the same chat window at the same time.
+- The indicator disappears after 2 seconds of inactivity.
+
+**How to test:**
+1. Open the app in two different browsers (or incognito windows).
+2. Log in with two different users.
+3. Open the same chat between the two users in both windows.
+4. When one user types, the other will see "typing..." in real time.
+
   - Message storage in MongoDB
   - Password reset via email
   - File uploads for chat messages
