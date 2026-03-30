@@ -131,6 +131,41 @@ export default function ChatWindow() {
   const handleSend = async (e) => {
     e.preventDefault();
     if (!input && !file) return;
+
+    // Bot chat logic
+    if (id === "bot") {
+      setMessages(prev => {
+        const updated = [...prev, { sender: "me", message: input, messageType: "text" }];
+        console.log("Messages after me:", updated);
+        return updated;
+      });
+      try {
+        const res = await window.axios?.post
+          ? await window.axios.post("/api/bot/message", { message: input })
+          : await import("axios").then(ax => ax.default.post("/api/bot/message", { message: input }));
+        const botReply = res?.data?.reply?.trim();
+        setMessages(prev => {
+          const updated = [...prev, {
+            sender: "bot",
+            message: botReply && botReply !== "" ? botReply : "Sorry, I could not process that right now. Please try again.",
+            messageType: "text"
+          }];
+          console.log("Messages after bot reply:", updated);
+          return updated;
+        });
+      } catch {
+        setMessages(prev => {
+          const updated = [...prev, { sender: "bot", message: "Sorry, I could not process that right now. Please try again.", messageType: "text" }];
+          console.log("Messages after bot error:", updated);
+          return updated;
+        });
+      }
+      setInput("");
+      setFile(null);
+      return;
+    }
+
+    // Normal user chat logic
     const formData = new FormData();
     formData.append("receiverId", id);
     formData.append("message", input);
@@ -167,11 +202,12 @@ export default function ChatWindow() {
         ) : messages.length === 0 ? (
           <div>No messages yet. Say hello!</div>
         ) : (
+          (console.log("Rendering messages:", messages), null) ||
           messages.map((msg, idx) => (
             <MessageItem
-              key={msg._id || msg.id || idx}
+              key={msg._id || msg.id || msg.sender+"-"+idx}
               msg={msg}
-              isMine={String((msg.senderId && msg.senderId._id) ? msg.senderId._id : msg.senderId || msg.sender) === String(user?._id)}
+              isMine={msg.sender === "me" || String((msg.senderId && msg.senderId._id) ? msg.senderId._id : msg.senderId) === String(user?._id)}
             />
           ))
         )}

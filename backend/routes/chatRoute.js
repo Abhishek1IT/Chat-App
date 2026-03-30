@@ -1,5 +1,4 @@
 import express from "express";
-import { sendMessage, markAsSeen } from "../controllers/sendMessageController.js";
 import {
   accessChat,
   getMyChats,

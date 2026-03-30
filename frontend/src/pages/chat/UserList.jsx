@@ -41,7 +41,9 @@ export default function UserList() {
           users.map((user) => (
             <div className="user-list-item" key={user._id} onClick={() => handleUserClick(user)}>
               <div className="user-avatar">
-                {user.avatar ? (
+                {user.isBot ? (
+                  user.name[0].toUpperCase()
+                ) : user.avatar ? (
                   <img src={user.avatar} alt={user.name} style={{ width: 38, height: 38, borderRadius: "50%" }} />
                 ) : (
                   user.name[0].toUpperCase()
@@ -49,7 +51,11 @@ export default function UserList() {
               </div>
               <div className="user-info">
                 <div className="user-name">{user.name}</div>
-                <div className="user-status">{onlineUsers && onlineUsers.includes(user._id) ? "Online" : "Offline"}</div>
+                <div className="user-status">
+                  {user.isBot
+                    ? "Online"
+                    : (onlineUsers && onlineUsers.includes(user._id) ? "Online" : "Offline")}
+                </div>
               </div>
             </div>
           ))

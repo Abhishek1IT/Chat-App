@@ -49,12 +49,15 @@ export default function MessageItem({ msg, isMine }) {
     );
   };
 
+  // Bot message: left, icon; User: right
+  const isBot = msg.sender === "bot";
   return (
-    <div className={`message-item${isMine ? " mine" : ""}`}>
-      <div className={`message-bubble${isMine ? " mine" : ""}`}>
-        {isMine && <div className="message-you">You</div>}
+    <div className={`message-item${isMine ? " mine" : ""}${isBot ? " bot-message" : ""}`} style={{ justifyContent: isBot ? "flex-start" : isMine ? "flex-end" : "flex-start" }}>
+      <div className={`message-bubble${isMine ? " mine" : ""}${isBot ? " bot-bubble" : ""}`}>
+        {isBot && <span style={{ marginRight: 6 }}>🤖</span>}
+        {isMine && !isBot && <div className="message-you">You</div>}
         {msg.messageType === "text" ? msg.message : renderFile()}
-        {isMine && (
+        {isMine && !isBot && (
           <div className="message-status" style={{ fontSize: 10, color: "#888", marginTop: 2, textAlign: "right" }}>
             {msg.status === "seen"
               ? "Seen"

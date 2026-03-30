@@ -31,7 +31,6 @@ const initSocket = (server) => {
         }
         users[userId].push(socket.id);
 
-        // attach userId to socket (fast lookup for disconnect)
         socket.userId = userId;
 
         // update DB

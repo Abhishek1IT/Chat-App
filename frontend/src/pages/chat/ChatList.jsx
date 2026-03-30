@@ -36,6 +36,14 @@ export default function ChatList() {
       <div className="chat-list-header">Users</div>
 
       <div className="chat-list-items">
+        {/* AI Chatbot */}
+        <div
+          className="chat-list-item"
+          onClick={() => navigate("/chat/bot")}
+        >
+          <div className="chat-list-name">AI Chatbot</div>
+        </div>
+        {/* Normal users */}
         {loading ? (
           <div className="chat-list-empty">Loading users...</div>
         ) : users.length === 0 ? (
