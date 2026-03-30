@@ -174,8 +174,10 @@ export default function ChatWindow() {
       const { data } = await sendMessageAPI(formData);
       if (data && data.message) {
         setMessages((prev) => {
-          if (prev.some((m) => m._id === data.message._id)) return prev;
-          return [...prev, data.message];
+          // Remove any placeholder file message (with no _id) before adding the real one
+          const filtered = prev.filter((m) => m._id || m.messageType !== "file");
+          if (filtered.some((m) => m._id === data.message._id)) return filtered;
+          return [...filtered, data.message];
         });
       }
       setInput("");

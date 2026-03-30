@@ -130,29 +130,6 @@ The server will run at [http://localhost:5000](http://localhost:5000).
 - `frontend/` — React app
 - `backend/` — Node.js/Express API
 
-### Frontend
-- `src/pages/` — Main pages:
-   - `auth/` — Login, Register, Profile
-   - `chat/` — ChatList, ChatWindow, UserList
-   - `password/` — ForgotPassword, ResetPassword
-- `src/components/` — UI components:
-   - `ChatItem.jsx` — Chat list item
-   - `FilePreview.jsx` — File preview before sending
-   - `Loader.jsx` — Loading spinner
-   - `MessageItem.jsx` — Single message bubble (shows status)
-- `src/api/` — API calls:
-   - `authApi.js` — Auth requests
-   - `axios.js` — Axios instance
-   - `chatApi.js` — Chat requests
-   - `messageApi.js` — Message send/seen
-   - `passwordApi.js` — Password reset
-   - `userApi.js` — User info
-- `src/context/` — React context providers:
-   - `AuthContext.jsx` — Auth state
-   - `SocketContext.jsx` — Socket connection and online users
-- `src/styles/` — CSS files for each component/page
-- `src/utils/storage.js` — Local storage helpers
-
 ### Backend Structure
 - `index.js` — Entry point, starts server and attaches socket.io
 - `app.js` — Express app, CORS, routes, static files

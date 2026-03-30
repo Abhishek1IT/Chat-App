@@ -35,7 +35,6 @@ export const registerUser = async (req, res) => {
           isOnline: user.isOnline,
           lastseen: user.lastSeen
         },
-        token: generateToken(user)
       });
     } else {
       res.status(400).json({ message: "Invalid user data" });
