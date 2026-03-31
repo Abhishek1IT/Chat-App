@@ -11,7 +11,6 @@ export default function SocketProvider({ children }) {
 
   useEffect(() => {
     const s = io(process.env.REACT_APP_SOCKET_URL);
-    console.log("Socket connected", s);
     setSocket(s);
     return () => s.disconnect();
   }, []);

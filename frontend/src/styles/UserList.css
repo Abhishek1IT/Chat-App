@@ -51,6 +51,12 @@
   font-weight: 700;
   margin-right: 14px;
 }
+.user-avatar.ai-chatbot {
+  background: #e0e0e0;
+  color: #222;
+  font-weight: bold;
+  font-size: 22px;
+}
 .user-info {
   flex: 1;
 }

@@ -29,20 +29,28 @@ export default function UserList() {
     navigate("/chat/" + user._id);
   };
 
+  // Always show AI Chatbot at the top
+  const aiChatbot = {
+    _id: "bot",
+    name: "AI Chatbot",
+    isBot: true
+  };
+  const allUsers = [aiChatbot, ...users];
+
   return (
     <div className="user-list-container">
       <div className="user-list-header">All Users</div>
       <div className="user-list-items">
         {loading ? (
           <div className="user-list-empty">Loading users...</div>
-        ) : users.length === 0 ? (
+        ) : allUsers.length === 0 ? (
           <div className="user-list-empty">No users found.</div>
         ) : (
-          users.map((user) => (
+          allUsers.map((user) => (
             <div className="user-list-item" key={user._id} onClick={() => handleUserClick(user)}>
-              <div className="user-avatar">
+              <div className={user.isBot ? "user-avatar ai-chatbot" : "user-avatar"}>
                 {user.isBot ? (
-                  user.name[0].toUpperCase()
+                  <span></span>
                 ) : user.avatar ? (
                   <img src={user.avatar} alt={user.name} style={{ width: 38, height: 38, borderRadius: "50%" }} />
                 ) : (

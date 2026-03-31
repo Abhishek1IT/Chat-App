@@ -6,7 +6,6 @@ import { AuthContext } from "../../context/AuthContext";
 import "../../styles/ChatList.css";
 
 export default function ChatList() {
-  console.log("ChatList mounted");
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const { user } = useContext(AuthContext);
@@ -16,7 +15,6 @@ export default function ChatList() {
     const fetchUsers = async () => {
       try {
         const { data } = await getAllUsers();  
-        console.log('getAllUsers data:', data);
         setUsers((data?.users || []).filter((u) => u._id !== user._id)); 
       } catch (err) {
         setUsers([]);
@@ -36,11 +34,12 @@ export default function ChatList() {
       <div className="chat-list-header">Users</div>
 
       <div className="chat-list-items">
-        {/* AI Chatbot */}
+        {/* Always show AI Chatbot at the top */}
         <div
-          className="chat-list-item"
+          className="chat-list-item ai-chatbot"
           onClick={() => navigate("/chat/bot")}
         >
+          <div className="chat-list-avatar ai-chatbot">🤖</div>
           <div className="chat-list-name">AI Chatbot</div>
         </div>
         {/* Normal users */}

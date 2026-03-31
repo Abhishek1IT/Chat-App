@@ -28,7 +28,6 @@ export default function Register() {
       }
 
       const { data } = await registerUser(input);
-      console.log("Register API response:", data);
       navigate("/login");
     } catch (err) {
       setError(err.response?.data?.message || "Something went wrong");

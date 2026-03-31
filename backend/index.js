@@ -20,14 +20,12 @@ const startServer = async () => {
 
     // Start server
     server.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
     });
 
     // Error handling
     server.on("error", (error) => {
       if (error.code === "EADDRINUSE") {
         console.error(`Port ${PORT} is already in use`);
-        console.log("Change PORT or stop running process");
       } else {
         console.error(`Server error: ${error.message}`);
       }

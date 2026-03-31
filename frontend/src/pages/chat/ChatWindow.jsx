@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useContext } from "react";
 import { useParams } from "react-router-dom";
 import { lodeMessages, accessChat } from "../../api/chatApi";
+import api from "../../api/axios";
 import { getAllUsers } from "../../api/userApi";
 import { sendMessageAPI } from "../../api/messageApi";
 import MessageItem from "../../components/MessageItem";
@@ -136,13 +137,10 @@ export default function ChatWindow() {
     if (id === "bot") {
       setMessages(prev => {
         const updated = [...prev, { sender: "me", message: input, messageType: "text" }];
-        console.log("Messages after me:", updated);
         return updated;
       });
       try {
-        const res = await window.axios?.post
-          ? await window.axios.post("/api/bot/message", { message: input })
-          : await import("axios").then(ax => ax.default.post("/api/bot/message", { message: input }));
+        const res = await api.post("/bot/message", { message: input });
         const botReply = res?.data?.reply?.trim();
         setMessages(prev => {
           const updated = [...prev, {
@@ -150,13 +148,11 @@ export default function ChatWindow() {
             message: botReply && botReply !== "" ? botReply : "Sorry, I could not process that right now. Please try again.",
             messageType: "text"
           }];
-          console.log("Messages after bot reply:", updated);
           return updated;
         });
       } catch {
         setMessages(prev => {
           const updated = [...prev, { sender: "bot", message: "Sorry, I could not process that right now. Please try again.", messageType: "text" }];
-          console.log("Messages after bot error:", updated);
           return updated;
         });
       }
@@ -204,7 +200,7 @@ export default function ChatWindow() {
         ) : messages.length === 0 ? (
           <div>No messages yet. Say hello!</div>
         ) : (
-          (console.log("Rendering messages:", messages), null) ||
+          null ||
           messages.map((msg, idx) => (
             <MessageItem
               key={msg._id || msg.id || msg.sender+"-"+idx}

@@ -18,7 +18,6 @@ const initSocket = (server) => {
         socket.join(chatId);
       }
     });
-    console.log("User connected:", socket.id);
 
     // USER ONLINE
     socket.on("userOnline", async (userId) => {
@@ -39,7 +38,6 @@ const initSocket = (server) => {
           lastSeen: new Date(),
         });
 
-        console.log("User online:", userId);
 
         // broadcast online users
         io.emit("onlineUsers", Object.keys(users));
@@ -72,7 +70,6 @@ const initSocket = (server) => {
             lastSeen: new Date(),
           });
 
-          console.log("User offline:", userId);
         }
 
         // broadcast update
