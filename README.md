@@ -4,18 +4,17 @@ This project is a full-stack real-time chat application with user authentication
 
 ---
 
-## ✨ New & Notable Features (2026)
-- **AI Chatbot (Gemini):** Always visible at the top of the Users list. Chat with the bot just like a user!
-- **No "Chats" page:** All chat access is now via the Users page. Simpler, more intuitive navigation.
-- **Clean UI:** All styles are in CSS files, no inline styles for avatars or bot.
-- **Navbar:** Only "Users", "Profile", and "Logout" for a focused experience.
-- **Docker Compose:** One command to run backend, frontend, and MongoDB together.
-- **Changelog:** See the bottom of this file for recent updates.
+## Features
+- AI Chatbot (Gemini): Always visible at the top of the Users list. Chat with the bot just like a user!
+- All chat access is via the Users page for simple, intuitive navigation.
+- Clean UI: All styles are in CSS files, no inline styles for avatars or bot.
+- Focused Navbar: Only "Users", "Profile", and "Logout".
+- Docker Compose: One command to run backend, frontend, and MongoDB together.
+- Real-time typing indicator: see "typing..." when the other user is typing in the same chat window.
 
 ---
 
 ## Quick Start (Docker Compose)
-
 1. Clone the repository and navigate to the project root.
 2. Build and run all services:
    ```bash
@@ -69,25 +68,8 @@ REACT_APP_API_URL=/api
 
 ---
 
-## Typing Indicator Feature
-- Real-time typing indicator: see "typing..." when the other user is typing in the same chat window.
-
----
-
 ## Notes
 - Make sure MongoDB and both servers are running (or use Docker Compose)
 - CORS is configured to allow requests from the frontend
 - For best experience, use the app in two browser windows with different users
 - The AI Chatbot is always available at the top of the Users list after login
-
----
-
-## Changelog
-
-### March 30, 2026
-- AI Chatbot is now always visible at the top of the Users list (after login)
-- Removed "Chats" page; all chat access is now via the Users list
-- Cleaned up inline styles; all avatar/chatbot styles are now in CSS files
-- Navbar only shows Users, Profile, and Logout
-- Docker Compose setup and environment variable usage improved
-- README updated for new usage and structure
