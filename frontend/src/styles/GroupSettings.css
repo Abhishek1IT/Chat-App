@@ -1,0 +1,41 @@
+.group-settings-container {
+  padding: 24px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+.group-settings-title {
+  margin-bottom: 16px;
+}
+.group-settings-section {
+  margin-bottom: 20px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
+}
+.group-settings-modal {
+  background: #fff;
+  border: 1px solid #ccc;
+  padding: 20px;
+  position: fixed;
+  top: 100px;
+  left: 0;
+  right: 0;
+  max-width: 400px;
+  margin: 0 auto;
+  z-index: 1000;
+}
+.group-settings-btn {
+  margin-left: 8px;
+}
+.group-settings-list {
+  list-style: none;
+  padding: 0;
+}
+.group-settings-list li {
+  margin-bottom: 8px;
+}
+.group-settings-adduser {
+  margin-top: 10px;
+}
+.group-settings-leave {
+  margin-top: 8px;
+}

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { useState } from "react";
 import { registerUser } from "../../api/authApi";
 import { useNavigate } from "react-router-dom";
@@ -27,7 +28,7 @@ export default function Register() {
         return setError("All fields are required!");
       }
 
-      const { data } = await registerUser(input);
+      await registerUser(input);
       navigate("/login");
     } catch (err) {
       setError(err.response?.data?.message || "Something went wrong");

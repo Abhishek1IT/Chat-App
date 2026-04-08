@@ -12,4 +12,3 @@ router.get("/users", protect, getAllUsers);
 router.get("/profile", protect, getProfile);
 
 export default router;
-

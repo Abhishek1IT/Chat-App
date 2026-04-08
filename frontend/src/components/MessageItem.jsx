@@ -1,6 +1,6 @@
 import "../styles/ChatWindow.css";
 
-export default function MessageItem({ msg, isMine }) {
+export default function MessageItem({ msg, isMine, isSelected }) {
   const fileName =
     msg.fileName ||
     msg.originalName ||
@@ -51,21 +51,42 @@ export default function MessageItem({ msg, isMine }) {
 
   // Bot message: left, icon; User: right
   const isBot = msg.sender === "bot";
+  // Format timestamp
+  const formatTime = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+  // Status icon logic
+  const getStatusIcon = (status) => {
+    if (status === "seen") {
+
+      return <span style={{ color: '#2196f3' }}>✔✔</span>;
+    } else if (status === "delivered") {
+
+      return <span style={{ color: '#888' }}>✔✔</span>;
+    } else {
+      
+      return <span style={{ color: '#888' }}>✔</span>;
+    }
+  };
   return (
-    <div className={`message-item${isMine ? " mine" : ""}${isBot ? " bot-message" : ""}`} style={{ justifyContent: isBot ? "flex-start" : isMine ? "flex-end" : "flex-start" }}>
+    <div
+      className={`message-item${isMine ? " mine" : ""}${isBot ? " bot-message" : ""}${isSelected ? " selected-message" : ""}`}
+      style={{ justifyContent: isBot ? "flex-start" : isMine ? "flex-end" : "flex-start", border: isSelected ? '2px solid #2196f3' : undefined }}
+    >
       <div className={`message-bubble${isMine ? " mine" : ""}${isBot ? " bot-bubble" : ""}`}>
         {isBot && <span style={{ marginRight: 6 }}>🤖</span>}
         {isMine && !isBot && <div className="message-you">You</div>}
         {msg.messageType === "text" ? msg.message : renderFile()}
-        {isMine && !isBot && (
-          <div className="message-status" style={{ fontSize: 10, color: "#888", marginTop: 2, textAlign: "right" }}>
-            {msg.status === "seen"
-              ? "Seen"
-              : msg.status === "delivered"
-              ? "Delivered"
-              : "Sent"}
-          </div>
-        )}
+        <div className="message-meta" style={{ fontSize: 10, color: "#888", marginTop: 2, textAlign: isMine ? "right" : "left", display: "flex", justifyContent: isMine ? "flex-end" : "flex-start", gap: 8, alignItems: "center" }}>
+          <span>{formatTime(msg.createdAt)}</span>
+          {isMine && !isBot && (
+            <span className="message-status" style={{ marginLeft: 4 }}>
+              {getStatusIcon(msg.status)}
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );

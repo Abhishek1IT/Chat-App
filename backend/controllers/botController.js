@@ -36,7 +36,12 @@ export async function botController(msg) {
 		const reply = result.response.text().trim() || "I could not generate a response.";
 		return reply;
 	} catch (error) {
-		console.error("Gemini API Error:", error?.message || error);
+		// Log full error for debugging
+		console.error("Gemini API Error (full):", error);
+		if (error && error.message) {
+			console.error("Gemini API Error (message):", error.message);
+		}
+		// Always return fallback error message
 		return "Sorry, I could not process that right now. Please try again.";
 	}
 }

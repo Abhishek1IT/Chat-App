@@ -1,9 +1,10 @@
+/* eslint-disable no-use-before-define */
 import { useEffect, useRef, useState, useContext } from "react";
 import { useParams } from "react-router-dom";
-import { lodeMessages, accessChat } from "../../api/chatApi";
 import api from "../../api/axios";
+import { accessChat, loadMessages, myChats } from "../../api/chatapi";
 import { getAllUsers } from "../../api/userApi";
-import { sendMessageAPI } from "../../api/messageApi";
+import { sendMessageAPI, deleteMessageAPI, editMessageAPI } from "../../api/messageApi";
 import MessageItem from "../../components/MessageItem";
 import FilePreview from "../../components/FilePreview";
 import { AuthContext } from "../../context/AuthContext";
@@ -12,6 +13,9 @@ import "../../styles/ChatWindow.css";
 
 export default function ChatWindow() {
   const { id } = useParams();
+  const [isGroup, setIsGroup] = useState(false);
+  const [groupInfo, setGroupInfo] = useState(null);
+  console.log("ChatWindow loaded", id);
   const { user } = useContext(AuthContext);
   const { socket } = useContext(SocketContext);
   const [messages, setMessages] = useState([]);
@@ -23,38 +27,84 @@ export default function ChatWindow() {
   const [chatUser, setChatUser] = useState(null);
   const typingTimeoutRef = useRef(null);
   const messagesEndRef = useRef(null);
+  // Edit message state
+  const [editingMsg, setEditingMsg] = useState(null);
+  // Selected message for header actions
+  const [selectedMsg, setSelectedMsg] = useState(null);
 
-  // Fetch chatId (real chat _id) and join room, and fetch chat user info
+  // Handler: Edit message (from header)
+  const handleEditMessage = (e) => {
+    if (e) e.preventDefault();
+    if (!selectedMsg) return;
+    setEditingMsg(selectedMsg);
+    setInput(selectedMsg.message);
+    setSelectedMsg(null);
+  };
+
+  // Handler: Delete message (from header)
+  const handleDeleteMessage = async (e) => {
+    if (e) e.preventDefault();
+    if (!selectedMsg) return;
+    if (!window.confirm("Delete this message?")) return;
+    try {
+      await deleteMessageAPI(selectedMsg._id);
+      setMessages((prev) => prev.filter((m) => m._id !== selectedMsg._id));
+      setSelectedMsg(null);
+    } catch (err) {
+      alert("Failed to delete message");
+    }
+  };
+
+  // Fetch chatId (real chat _id) and join room, and fetch chat user info or group info
+  // Always join the group/user chat room on mount and id change
   useEffect(() => {
-    const fetchChatIdAndJoin = async () => {
-      if (socket && id && user?._id) {
-        try {
-          const { data } = await accessChat({ userId: id });
-          if (data && data._id) {
-            setChatId(data._id);
-            socket.emit("join", { chatId: data._id });
+    const fetchChatOrGroup = async () => {
+      if (!socket || !id || !user?._id) return;
+      // Check if id is a group
+      try {
+        const { data } = await myChats();
+        const group = (data || []).find((g) => g._id === id && g.isGroupChat);
+        if (group) {
+          setIsGroup(true);
+          setGroupInfo(group);
+          setChatId(group._id);
+          setChatUser(null);
+          socket.emit("join", { chatId: group._id });
+        } else {
+          setIsGroup(false);
+          setGroupInfo(null);
+          // Normal user chat
+          const { data: chatData } = await accessChat({ userId: id });
+          if (chatData && chatData._id) {
+            setChatId(chatData._id);
+            socket.emit("join", { chatId: chatData._id });
           }
-        } catch {}
-      }
-    };
-    fetchChatIdAndJoin();
-
-    // Fetch chat user info
-    const fetchChatUser = async () => {
-      if (id && user?._id) {
-        try {
-          const { data } = await getAllUsers();
-          if (data && data.users) {
-            const found = data.users.find((u) => u._id === id);
+          // Fetch chat user info
+          const { data: usersData } = await getAllUsers();
+          if (usersData && usersData.users) {
+            const found = usersData.users.find((u) => u._id === id);
             setChatUser(found || null);
           }
-        } catch {
-          setChatUser(null);
         }
+      } catch {
+        setIsGroup(false);
+        setGroupInfo(null);
       }
     };
-    fetchChatUser();
+    fetchChatOrGroup();
   }, [socket, id, user]);
+
+  // Re-join chat room if socket reconnects (ensures group messages always received)
+  useEffect(() => {
+    if (!socket || !chatId) return;
+    const handleReconnect = () => {
+      socket.emit("join", { chatId });
+    };
+    socket.on("connect", handleReconnect);
+    return () => {
+      socket.off("connect", handleReconnect);
+    };
+  }, [socket, chatId]);
 
   useEffect(() => {
     if (!socket || !chatId) return;
@@ -76,7 +126,9 @@ export default function ChatWindow() {
     const fetchMessages = async () => {
       setLoading(true);
       try {
-        const { data } = await lodeMessages(id);
+        // For group, fetch messages by groupId, for user, by userId
+        const fetchId = id;
+        const { data } = await loadMessages(fetchId);
         setMessages(Array.isArray(data) ? data : []);
       } catch {
         setMessages([]);
@@ -133,14 +185,31 @@ export default function ChatWindow() {
     e.preventDefault();
     if (!input && !file) return;
 
+    // Edit mode
+    if (editingMsg) {
+      console.log("[Edit API] editingMsg:", editingMsg);
+      try {
+        const { data } = await editMessageAPI(editingMsg._id, { message: input });
+        setMessages((prev) => prev.map((m) => m._id === editingMsg._id ? data.message : m));
+        setEditingMsg(null);
+        setInput("");
+        setFile(null);
+      } catch {
+        alert("Failed to edit message");
+      }
+      return;
+    }
+
     // Bot chat logic
     if (id === "bot") {
+      console.log("[BOT] Sending message to bot:", input);
       setMessages(prev => {
         const updated = [...prev, { sender: "me", message: input, messageType: "text" }];
         return updated;
       });
       try {
         const res = await api.post("/bot/message", { message: input });
+        console.log("[BOT] API response:", res);
         const botReply = res?.data?.reply?.trim();
         setMessages(prev => {
           const updated = [...prev, {
@@ -150,7 +219,8 @@ export default function ChatWindow() {
           }];
           return updated;
         });
-      } catch {
+      } catch (err) {
+        console.error("[BOT] API error:", err);
         setMessages(prev => {
           const updated = [...prev, { sender: "bot", message: "Sorry, I could not process that right now. Please try again.", messageType: "text" }];
           return updated;
@@ -161,9 +231,13 @@ export default function ChatWindow() {
       return;
     }
 
-    // Normal user chat logic
+    // Normal user or group chat logic
     const formData = new FormData();
-    formData.append("receiverId", id);
+    if (isGroup) {
+      formData.append("groupId", id);
+    } else {
+      formData.append("receiverId", id);
+    }
     formData.append("message", input);
     if (file) formData.append("file", file);
     try {
@@ -189,10 +263,36 @@ export default function ChatWindow() {
     }
   };
 
+  // Format last seen
+  const formatLastSeen = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    const now = new Date();
+    const diff = Math.floor((now - date) / 60000); // minutes
+    if (diff < 1) return "just now";
+    if (diff < 60) return `${diff} min ago`;
+    if (diff < 1440) return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return date.toLocaleDateString();
+  };
+
   return (
     <div className="chat-window-container">
-      <div className="chat-window-header">
-        {chatUser ? chatUser.name : "Chat"}
+      <div className="chat-window-header chat-window-header-flex">
+        <div>{isGroup && groupInfo ? groupInfo.name : chatUser ? chatUser.name : "Chat"}</div>
+        <div className="chat-header-right">
+          {chatUser && !chatUser.isBot && (
+            <div className="chat-header-lastseen">
+              {chatUser.isOnline ? "Online" : chatUser.lastSeen ? `Last seen: ${formatLastSeen(chatUser.lastSeen)}` : "Offline"}
+            </div>
+          )}
+          {selectedMsg && (
+            <div className="chat-header-actions">
+              <button className="chat-header-btn edit" onClick={handleEditMessage}>✏️</button>
+              <button className="chat-header-btn delete" onClick={handleDeleteMessage}>🗑️</button>
+              <button className="chat-header-btn cancel" onClick={() => setSelectedMsg(null)}>❌</button>
+            </div>
+          )}
+        </div>
       </div>
       <div className="chat-window-messages">
         {loading ? (
@@ -200,14 +300,23 @@ export default function ChatWindow() {
         ) : messages.length === 0 ? (
           <div>No messages yet. Say hello!</div>
         ) : (
-          null ||
-          messages.map((msg, idx) => (
-            <MessageItem
-              key={msg._id || msg.id || msg.sender+"-"+idx}
-              msg={msg}
-              isMine={msg.sender === "me" || String((msg.senderId && msg.senderId._id) ? msg.senderId._id : msg.senderId) === String(user?._id)}
-            />
-          ))
+          messages.map((msg, idx) => {
+            const isMine = msg.sender === "me" || String((msg.senderId && msg.senderId._id) ? msg.senderId._id : msg.senderId) === String(user?._id);
+            const isSelected = selectedMsg && selectedMsg._id === msg._id;
+            return (
+              <div
+                key={msg._id || msg.id || msg.sender+"-"+idx}
+                className={`chat-message-row${isMine ? " mine" : ""}${isSelected ? " selected-message" : ""}`}
+                onClick={() => isMine && setSelectedMsg(isSelected ? null : msg)}
+              >
+                <MessageItem
+                  msg={msg}
+                  isMine={isMine}
+                  isSelected={isSelected}
+                />
+              </div>
+            );
+          })
         )}
         {isTyping && <div className="typing-indicator">typing...</div>}
         <div ref={messagesEndRef} />
@@ -227,7 +336,7 @@ export default function ChatWindow() {
         />
         <label
           htmlFor="file-upload"
-          style={{ marginRight: 8, cursor: "pointer" }}
+          className="file-upload-label"
         >
           📎
         </label>

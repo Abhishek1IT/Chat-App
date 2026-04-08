@@ -1,6 +1,6 @@
 import express from "express";
 import authRoutes from "./routes/authRoute.js";
-import sendMessageRoutes from "./routes/sendMessageRoute.js";
+import sendMessageRoutes from "./routes/sendmessageRoute.js";
 import forgotPassRoutes from "./routes/frogotPassRoute.js";
 import chatRoutes from "./routes/chatRoute.js";
 import botRoutes from "./routes/botRoute.js";

@@ -16,6 +16,7 @@ const initSocket = (server) => {
     socket.on("join", ({ chatId }) => {
       if (chatId) {
         socket.join(chatId);
+        console.log(`User ${socket.userId || 'unknown'} joined room: ${chatId}`);
       }
     });
 
@@ -31,13 +32,13 @@ const initSocket = (server) => {
         users[userId].push(socket.id);
 
         socket.userId = userId;
+        console.log(`User online: ${userId}, socket: ${socket.id}`);
 
         // update DB
         await User.findByIdAndUpdate(userId, {
           isOnline: true,
           lastSeen: new Date(),
         });
-
 
         // broadcast online users
         io.emit("onlineUsers", Object.keys(users));
@@ -51,8 +52,45 @@ const initSocket = (server) => {
       socket.to(chatId).emit("typing", { chatId, userId });
     });
 
+    // Add Admin
+    socket.on("Add Admin", ({ groupId, userId }) => {
+      console.log(`Add Admin: user ${userId} to group ${groupId}`);
+      socket.to(groupId).emit("Add Admin", { groupId, userId });
+    });
+
+    // Remove Admin
+    socket.on("Remove Admin", ({ groupId, userId }) => {
+      console.log(`Remove Admin: user ${userId} from group ${groupId}`);
+      socket.to(groupId).emit("Remove Admin", { groupId, userId });
+    });
+
+    // Admin Add User
+    socket.on("Admin Add User", ({ groupId, userId }) => {
+      console.log(`Admin Add User: user ${userId} to group ${groupId}`);
+      socket.to(groupId).emit("Admin Add User", { groupId, userId });
+    });
+
+    // Admin Remove User
+    socket.on("Admin Remove User", ({ groupId, userId }) => {
+      console.log(`Admin Remove User: user ${userId} from group ${groupId}`);
+      socket.to(groupId).emit("Admin Remove User", { groupId, userId });
+    });
+
+    // Leave Group
+    socket.on("Leave Group", ({ groupId, userId }) => {
+      console.log(`Leave Group: user ${userId} left group ${groupId}`);
+      socket.to(groupId).emit("Leave Group", { groupId, userId });
+    });
+
+    // Delete Group
+    socket.on("Delete Group", ({ groupId }) => {
+      console.log(`Delete Group: group ${groupId} deleted`);
+      socket.to(groupId).emit("Delete Group", { groupId });
+    });
+
     // DISCONNECT
     socket.on("disconnect", async () => {
+      console.log(`User disconnected: ${socket.userId || 'unknown'}, socket: ${socket.id}`);
       try {
         const userId = socket.userId;
 

@@ -32,6 +32,23 @@ export default function SocketProvider({ children }) {
     };
   }, [socket]);
 
+  useEffect(() => {
+    if (!socket) return;
+    // Group events
+    socket.on("GroupCreated", () => {});
+    socket.on("AddAdmin", () => {});
+    socket.on("RemoveAdmin", () => {});
+    socket.on("AdminRemoveUser", () => {});
+    socket.on("LeaveGroup", () => {});
+    return () => {
+      socket.off("GroupCreated");
+      socket.off("AddAdmin");
+      socket.off("RemoveAdmin");
+      socket.off("AdminRemoveUser");
+      socket.off("LeaveGroup");
+    };
+  }, [socket]);
+
   return (
     <SocketContext.Provider value={{ socket, onlineUsers }}>
       {children}

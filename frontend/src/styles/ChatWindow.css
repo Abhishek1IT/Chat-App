@@ -1,3 +1,62 @@
+/* Header Flex Layout */
+.chat-window-header-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chat-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.chat-header-lastseen {
+  font-size: 12px;
+  color: #fff;
+}
+
+.chat-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chat-header-btn {
+  background: none;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 2px 8px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+.chat-header-btn.edit { color: #2196f3; }
+.chat-header-btn.delete { color: #e53935; }
+.chat-header-btn.forward { color: #43a047; }
+.chat-header-btn.cancel { color: #888; }
+.chat-header-btn:hover { background: #f1f5f9; }
+
+/* Selected message highlight */
+.chat-message-row.selected-message {
+  background: #e3f2fd;
+  border-radius: 8px;
+}
+.chat-message-row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.chat-message-row.mine {
+  align-items: flex-end;
+}
+
+/* File upload label */
+.file-upload-label {
+  margin-right: 8px;
+  cursor: pointer;
+}
 .typing-indicator {
   font-style: italic;
   color: #888;

@@ -12,6 +12,7 @@ import ChatList from "./pages/chat/ChatList";
 import ChatWindow from "./pages/chat/ChatWindow";
 import ForgotPassword from "./pages/password/ForgotPassword";
 import ResetPassword from "./pages/password/ResetPassword";
+import GroupManager from "./pages/chat/GroupManager";
 
 export default function AppRoutes({ user }) {
 	return (
@@ -30,6 +31,7 @@ export default function AppRoutes({ user }) {
 					   <Route path="/chats" element={<ChatList />} />
 					   <Route path="/chat/:id" element={<ChatWindow />} />
 					   <Route path="/profile" element={<Profile />} />
+					   <Route path="/groups" element={<GroupManager />} />
 					   <Route path="*" element={<Navigate to="/users" replace />} />
 				   </>
 			   )}

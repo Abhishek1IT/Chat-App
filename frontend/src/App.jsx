@@ -13,6 +13,7 @@ function Navbar({ user, onLogout }) {
         <span className="navbar-link" onClick={() => navigate("/users")}>Users</span>
         <span className="navbar-link" onClick={() => navigate("/profile")}>Profile</span>
         <span className="navbar-link" onClick={onLogout}>Logout</span>
+        <span className="navbar-link" onClick={() => navigate("/groups")}>Groups</span>
       </div>
     </nav>
   );

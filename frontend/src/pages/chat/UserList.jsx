@@ -29,30 +29,33 @@ export default function UserList() {
     navigate("/chat/" + user._id);
   };
 
-  // Always show AI Chatbot at the top
-  const aiChatbot = {
-    _id: "bot",
-    name: "AI Chatbot",
-    isBot: true
-  };
-  const allUsers = [aiChatbot, ...users];
+  // Remove hardcoded AI Chatbot, use only users from backend
+  // Filter out backend AI Chatbot (isBot: true)
+  const filteredUsers = users.filter((u) => !u.isBot);
 
   return (
     <div className="user-list-container">
       <div className="user-list-header">All Users</div>
       <div className="user-list-items">
+        {/* Fixed AI Chatbot button */}
+        <div className="user-list-item ai-chatbot-fixed" onClick={() => navigate("/chat/bot")}> 
+          <div className="user-avatar ai-chatbot">🤖</div>
+          <div className="user-info">
+            <div className="user-name">AI Chatbot</div>
+            <div className="user-status">Online</div>
+          </div>
+        </div>
+        {/* Normal users */}
         {loading ? (
           <div className="user-list-empty">Loading users...</div>
-        ) : allUsers.length === 0 ? (
+        ) : filteredUsers.length === 0 ? (
           <div className="user-list-empty">No users found.</div>
         ) : (
-          allUsers.map((user) => (
+          filteredUsers.map((user) => (
             <div className="user-list-item" key={user._id} onClick={() => handleUserClick(user)}>
-              <div className={user.isBot ? "user-avatar ai-chatbot" : "user-avatar"}>
-                {user.isBot ? (
-                  <span></span>
-                ) : user.avatar ? (
-                  <img src={user.avatar} alt={user.name} style={{ width: 38, height: 38, borderRadius: "50%" }} />
+              <div className="user-avatar">
+                {user.avatar ? (
+                  <img src={user.avatar} alt={user.name} className="user-avatar-img" />
                 ) : (
                   user.name[0].toUpperCase()
                 )}
@@ -60,9 +63,7 @@ export default function UserList() {
               <div className="user-info">
                 <div className="user-name">{user.name}</div>
                 <div className="user-status">
-                  {user.isBot
-                    ? "Online"
-                    : (onlineUsers && onlineUsers.includes(user._id) ? "Online" : "Offline")}
+                  {onlineUsers && onlineUsers.includes(user._id) ? "Online" : "Offline"}
                 </div>
               </div>
             </div>
