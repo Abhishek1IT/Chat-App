@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { getAllUsers } from "../api/userApi";
-import { createGroupChat } from "../api/chatapi";
+import { createGroupChat } from "../api/chatApi";
 
 export default function CreateGroupModal({ onClose, onGroupCreated }) {
   const [users, setUsers] = useState([]);

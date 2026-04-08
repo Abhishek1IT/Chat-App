@@ -8,7 +8,7 @@ import {
   adminRemoveUser,
   leaveGroup,
   deleteGroup,
-} from "../../api/chatapi";
+} from "../../api/chatApi";
 import { getAllUsers } from "../../api/userApi";
 import CreateGroupModal from "../../components/CreateGroupModal";
 import AddUserModal from "../../components/AddUserModal";

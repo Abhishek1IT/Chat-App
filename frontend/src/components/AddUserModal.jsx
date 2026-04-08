@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { getAllUsers } from "../api/userApi";
-import { adminAddUser } from "../api/chatapi";
+import { adminAddUser } from "../api/chatApi";
 
 export default function AddUserModal({ group, onClose, onUserAdded }) {
   const [users, setUsers] = useState([]);

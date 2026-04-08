@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState, useContext } from "react";
 import { useParams } from "react-router-dom";
 import api from "../../api/axios";
-import { accessChat, loadMessages, myChats } from "../../api/chatapi";
+import { accessChat, loadMessages, myChats } from "../../api/chatApi";
 import { getAllUsers } from "../../api/userApi";
 import { sendMessageAPI, deleteMessageAPI, editMessageAPI } from "../../api/messageApi";
 import MessageItem from "../../components/MessageItem";
@@ -15,7 +15,6 @@ export default function ChatWindow() {
   const { id } = useParams();
   const [isGroup, setIsGroup] = useState(false);
   const [groupInfo, setGroupInfo] = useState(null);
-  console.log("ChatWindow loaded", id);
   const { user } = useContext(AuthContext);
   const { socket } = useContext(SocketContext);
   const [messages, setMessages] = useState([]);
@@ -55,8 +54,6 @@ export default function ChatWindow() {
     }
   };
 
-  // Fetch chatId (real chat _id) and join room, and fetch chat user info or group info
-  // Always join the group/user chat room on mount and id change
   useEffect(() => {
     const fetchChatOrGroup = async () => {
       if (!socket || !id || !user?._id) return;

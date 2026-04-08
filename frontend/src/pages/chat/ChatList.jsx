@@ -3,7 +3,7 @@ import { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { getAllUsers } from "../../api/userApi";
 import { AuthContext } from "../../context/AuthContext";
-import { myChats } from "../../api/chatapi";
+import { myChats } from "../../api/chatApi";
 import "../../styles/ChatList.css";
 
 export default function ChatList() {
