@@ -78,14 +78,21 @@ export const getMyChats = async (req, res) => {
 export const getChatMessages = async (req, res) => {
   try {
     const { userId } = req.params;
-
-    const messages = await Message.find({
-      $or: [
-        { senderId: req.user.id, receiverId: userId },
-        { senderId: userId, receiverId: req.user.id },
-      ],
-    }).sort({ createdAt: 1 });
-
+    // Check if this is a group chat
+    const chat = await Chat.findById(userId);
+    let messages = [];
+    if (chat && chat.isGroupChat) {
+      // Group chat: fetch all messages where receiverId is groupId
+      messages = await Message.find({ receiverId: userId }).sort({ createdAt: 1 });
+    } else {
+      // Personal chat: fetch messages between two users
+      messages = await Message.find({
+        $or: [
+          { senderId: req.user.id, receiverId: userId },
+          { senderId: userId, receiverId: req.user.id },
+        ],
+      }).sort({ createdAt: 1 });
+    }
     res.json(messages);
   } catch (error) {
     res.status(500).json({ message: error.message });

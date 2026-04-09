@@ -40,12 +40,14 @@ export default function SocketProvider({ children }) {
     socket.on("RemoveAdmin", () => {});
     socket.on("AdminRemoveUser", () => {});
     socket.on("LeaveGroup", () => {});
+    socket.on("Delete Group", () => {});
     return () => {
       socket.off("GroupCreated");
       socket.off("AddAdmin");
       socket.off("RemoveAdmin");
       socket.off("AdminRemoveUser");
       socket.off("LeaveGroup");
+      socket.off("Delete Group");
     };
   }, [socket]);
 

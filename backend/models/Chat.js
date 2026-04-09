@@ -12,10 +12,12 @@ const chatSchema = new mongoose.Schema(
       trim: true,
     },
 
-    admin: [{
+    admin: [
+      {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-    }],
+      },
+    ],
 
     participants: [
       {

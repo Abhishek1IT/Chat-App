@@ -1,3 +1,5 @@
+import { seenAPI } from "../../api/messageApi";
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-use-before-define */
 import { useEffect, useRef, useState, useContext } from "react";
 import { useParams } from "react-router-dom";
@@ -55,9 +57,9 @@ export default function ChatWindow() {
   };
 
   useEffect(() => {
+    let intervalId;
     const fetchChatOrGroup = async () => {
       if (!socket || !id || !user?._id) return;
-      // Check if id is a group
       try {
         const { data } = await myChats();
         const group = (data || []).find((g) => g._id === id && g.isGroupChat);
@@ -77,11 +79,15 @@ export default function ChatWindow() {
             socket.emit("join", { chatId: chatData._id });
           }
           // Fetch chat user info
-          const { data: usersData } = await getAllUsers();
-          if (usersData && usersData.users) {
-            const found = usersData.users.find((u) => u._id === id);
-            setChatUser(found || null);
-          }
+          const fetchUser = async () => {
+            const { data: usersData } = await getAllUsers();
+            if (usersData && usersData.users) {
+              const found = usersData.users.find((u) => u._id === id);
+              setChatUser(found || null);
+            }
+          };
+          fetchUser();
+          intervalId = setInterval(fetchUser, 10000);
         }
       } catch {
         setIsGroup(false);
@@ -89,6 +95,9 @@ export default function ChatWindow() {
       }
     };
     fetchChatOrGroup();
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
   }, [socket, id, user]);
 
   // Re-join chat room if socket reconnects (ensures group messages always received)
@@ -127,6 +136,10 @@ export default function ChatWindow() {
         const fetchId = id;
         const { data } = await loadMessages(fetchId);
         setMessages(Array.isArray(data) ? data : []);
+        // Mark as seen for personal chat
+        if (!isGroup && user && id) {
+          await seenAPI({ senderId: id });
+        }
       } catch {
         setMessages([]);
       } finally {
@@ -134,7 +147,7 @@ export default function ChatWindow() {
       }
     };
     fetchMessages();
-  }, [id]);
+  }, [id, isGroup, user]);
 
   useEffect(() => {
     if (!socket) return;
@@ -143,12 +156,12 @@ export default function ChatWindow() {
         ...msg,
         senderId: typeof msg.senderId === 'object' && msg.senderId !== null ? msg.senderId._id : msg.senderId,
         receiverId: typeof msg.receiverId === 'object' && msg.receiverId !== null ? msg.receiverId._id : msg.receiverId,
+        groupId: typeof msg.groupId === 'object' && msg.groupId !== null ? msg.groupId._id : msg.groupId,
       };
-      // Only add if message is for this chat
-      if (
-        (normalizedMsg.senderId && normalizedMsg.senderId === id) ||
-        (normalizedMsg.receiverId && normalizedMsg.receiverId === id)
-      ) {
+      // For group chat, check groupId; for personal chat, check sender/receiver
+      const isGroupMsg = isGroup && normalizedMsg.groupId === id;
+      const isPersonalMsg = !isGroup && ((normalizedMsg.senderId && normalizedMsg.senderId === id) || (normalizedMsg.receiverId && normalizedMsg.receiverId === id));
+      if (isGroupMsg || isPersonalMsg) {
         setMessages((prev) => {
           if (prev.some((m) => m._id === normalizedMsg._id)) return prev;
           return [...prev, normalizedMsg];

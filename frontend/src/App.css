@@ -11,9 +11,14 @@
   margin-bottom: 0;
 }
 
+
 .navbar-links {
   display: flex;
   gap: 1.5rem;
+}
+
+.navbar-logout {
+  margin-left: auto;
 }
 
 .navbar-link {

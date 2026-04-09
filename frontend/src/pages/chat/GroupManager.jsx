@@ -176,6 +176,22 @@ export default function GroupManager() {
               </div>
             </div>
           </div>
+          <div className="gm-group-actions gm-group-actions-top">
+            <button className="gm-btn gm-leave-group" onClick={handleLeaveGroup}>
+              Leave Group
+            </button>
+            <button className="gm-btn gm-open-chat" onClick={() => navigate(`/chat/${selectedGroup._id}`)}>
+              Open Chat
+            </button>
+            <button className="gm-btn gm-delete-group" onClick={handleDeleteGroup}>
+              Delete Group
+            </button>
+          </div>
+          <div style={{ margin: '10px 0 0 0' }}>
+            <button className="gm-btn gm-add-user" onClick={() => setShowAddUser(true)}>
+              Add User
+            </button>
+          </div>
           <div className="gm-members-list-section">
             <h5>Members</h5>
             <ul className="gm-members-list">
@@ -211,20 +227,6 @@ export default function GroupManager() {
                 );
               })}
             </ul>
-            <button className="gm-btn gm-add-user" onClick={() => setShowAddUser(true)}>
-              Add User
-            </button>
-          </div>
-          <div className="gm-group-actions">
-            <button className="gm-btn gm-leave-group" onClick={handleLeaveGroup}>
-              Leave Group
-            </button>
-            <button className="gm-btn gm-open-chat" onClick={() => navigate(`/chat/${selectedGroup._id}`)}>
-              Open Chat
-            </button>
-            <button className="gm-btn gm-delete-group" onClick={handleDeleteGroup}>
-              Delete Group
-            </button>
           </div>
         </div>
       )}

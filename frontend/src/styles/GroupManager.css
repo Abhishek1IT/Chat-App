@@ -111,6 +111,7 @@
   display: flex;
   gap: 18px;
 }
+
 .gm-members-list-section {
   margin-top: 18px;
 }
@@ -118,48 +119,71 @@
   list-style: none;
   padding: 0;
   margin: 0;
+  border-radius: 12px;
+  background: #f7f9fa;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.03);
 }
 .gm-member-item {
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 8px 0;
+  padding: 10px 12px;
   border-bottom: 1px solid #f0f0f0;
+  border-radius: 10px;
+  transition: background 0.18s;
+  cursor: pointer;
+}
+.gm-member-item:last-child {
+  border-bottom: none;
+}
+.gm-member-item:hover {
+  background: #eafff3;
 }
 .gm-member-avatar {
-  width: 34px;
-  height: 34px;
+  width: 38px;
+  height: 38px;
   background: #ece5dd;
   color: #075e54;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 600;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  border: 2px solid #fff;
 }
 .gm-member-avatar.admin {
   background: #25d366;
   color: #fff;
+  border: 2px solid #25d366;
 }
 .gm-member-info {
   flex: 1;
   display: flex;
   flex-direction: column;
+  justify-content: center;
 }
 .gm-member-name {
   font-size: 16px;
   font-weight: 500;
+  color: #222;
 }
 .gm-member-role {
   font-size: 13px;
   color: #128c7e;
-  font-weight: 500;
-  margin-left: 6px;
+  font-weight: 600;
+  margin-left: 8px;
+  background: #eafff3;
+  border-radius: 6px;
+  padding: 2px 8px;
+  display: inline-block;
+  margin-top: 2px;
 }
 .gm-member-actions {
   display: flex;
   gap: 6px;
+  align-items: center;
 }
 .gm-btn {
   background: #e0e0e0;
@@ -198,6 +222,12 @@
   display: flex;
   gap: 12px;
   margin-top: 18px;
+}
+.gm-group-actions-top {
+  margin-bottom: 18px;
+  margin-top: 0;
+  justify-content: flex-start;
+  flex-wrap: wrap;
 }
 .gm-leave-group {
   background: #ffe0e0;

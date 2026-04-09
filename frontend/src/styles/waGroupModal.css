@@ -1,0 +1,152 @@
+/* WhatsApp-style modal and user list for group creation and add user */
+.wa-modal-bg {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.18);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.wa-modal {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.13);
+  min-width: 340px;
+  max-width: 95vw;
+  width: 380px;
+  padding: 0;
+  animation: waModalIn 0.18s cubic-bezier(.4,0,.2,1);
+  display: flex;
+  flex-direction: column;
+}
+@keyframes waModalIn {
+  from { transform: scale(0.95) translateY(30px); opacity: 0; }
+  to { transform: scale(1) translateY(0); opacity: 1; }
+}
+.wa-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px 10px 22px;
+  border-bottom: 1px solid #f0f0f0;
+}
+.wa-modal-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #075e54;
+}
+.wa-modal-close {
+  background: none;
+  border: none;
+  font-size: 26px;
+  color: #888;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0 2px;
+  transition: color 0.18s;
+}
+.wa-modal-close:hover {
+  color: #d32f2f;
+}
+.wa-modal-body {
+  padding: 18px 22px 0 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.wa-group-name-input {
+  font-size: 16px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  outline: none;
+  margin-bottom: 8px;
+  transition: border 0.18s;
+}
+.wa-group-name-input:focus {
+  border: 1.5px solid #25d366;
+}
+.wa-user-list-label {
+  font-size: 15px;
+  color: #128c7e;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+.wa-user-list {
+  max-height: 180px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.wa-user-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #f7f9fa;
+  border: 1.5px solid transparent;
+  transition: background 0.18s, border 0.18s;
+  font-size: 15px;
+  user-select: none;
+}
+.wa-user-item.selected, .wa-user-item:hover {
+  background: #eafff3;
+  border-color: #25d366;
+}
+.wa-user-avatar {
+  width: 32px;
+  height: 32px;
+  background: #25d366;
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 600;
+}
+.wa-user-name {
+  font-weight: 500;
+  color: #075e54;
+}
+.wa-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 22px 18px 22px;
+  border-top: 1px solid #f0f0f0;
+}
+.wa-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 8px 20px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s;
+}
+.wa-btn-primary {
+  background: #25d366;
+  color: #fff;
+}
+.wa-btn-primary:disabled {
+  background: #b2dfb2;
+  color: #fff;
+  cursor: not-allowed;
+}
+.wa-btn-primary:not(:disabled):hover {
+  background: #20b858;
+}
+.wa-btn-secondary {
+  background: #e0e0e0;
+  color: #075e54;
+}
+.wa-btn-secondary:hover {
+  background: #c8f5e5;
+  color: #128c7e;
+}

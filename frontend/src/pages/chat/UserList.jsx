@@ -29,8 +29,6 @@ export default function UserList() {
     navigate("/chat/" + user._id);
   };
 
-  // Remove hardcoded AI Chatbot, use only users from backend
-  // Filter out backend AI Chatbot (isBot: true)
   const filteredUsers = users.filter((u) => !u.isBot);
 
   return (

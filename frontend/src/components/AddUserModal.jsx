@@ -23,14 +23,41 @@ export default function AddUserModal({ group, onClose, onUserAdded }) {
   };
 
   return (
-    <div className="group-settings-modal">
-      <h4>Add User to Group</h4>
-      <select value={selected} onChange={e => setSelected(e.target.value)}>
-        <option value="">Select user</option>
-        {users.map(u => <option key={u._id} value={u._id}>{u.name}</option>)}
-      </select>
-      <button onClick={handleAdd} disabled={loading || !selected}>Add</button>
-      <button onClick={onClose} style={{ marginLeft: 8 }}>Cancel</button>
+    <div className="wa-modal-bg">
+      <div className="wa-modal">
+        <div className="wa-modal-header">
+          <span className="wa-modal-title">Add User to Group</span>
+          <button className="wa-modal-close" onClick={onClose}>&times;</button>
+        </div>
+        <div className="wa-modal-body">
+          <div className="wa-user-list-label">Select User</div>
+          <div className="wa-user-list">
+            {users.map(u => (
+              <label key={u._id} className={selected === u._id ? "wa-user-item selected" : "wa-user-item"}>
+                <input
+                  type="radio"
+                  name="add-user"
+                  value={u._id}
+                  checked={selected === u._id}
+                  onChange={() => setSelected(u._id)}
+                />
+                <span className="wa-user-avatar">{u.name[0]}</span>
+                <span className="wa-user-name">{u.name}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+        <div className="wa-modal-footer">
+          <button
+            className="wa-btn wa-btn-primary"
+            onClick={handleAdd}
+            disabled={loading || !selected}
+          >
+            {loading ? "Adding..." : "Add"}
+          </button>
+          <button className="wa-btn wa-btn-secondary" onClick={onClose}>Cancel</button>
+        </div>
+      </div>
     </div>
   );
 }
