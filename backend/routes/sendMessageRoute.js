@@ -4,6 +4,8 @@ import {
     markAsSeen, 
     editMessage, 
     deleteMessage, 
+    deleteMessageForMe,
+    groupChatDelivered,
                 } from "../controllers/sendMessageController.js";
 import { protect } from "../middleware/authMiddleware.js";
 import { upload } from "../uploads/upload.js";
@@ -14,5 +16,7 @@ router.post("/send", protect, upload.single("file"), sendMessage);
 router.put("/seen", protect, markAsSeen);
 router.patch("/edit/:id", protect, editMessage);
 router.delete("/delete/:id", protect, deleteMessage);
+router.delete("/deleteforme/:id", protect, deleteMessageForMe);
+router.put("/delivered/:id", protect, groupChatDelivered);
 
 export default router;

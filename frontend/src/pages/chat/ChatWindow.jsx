@@ -1,24 +1,32 @@
-import { seenAPI } from "../../api/messageApi";
 /* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable no-use-before-define */
 import { useEffect, useRef, useState, useContext } from "react";
 import { useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import api from "../../api/axios";
-import { accessChat, loadMessages, myChats } from "../../api/chatApi";
+import { accessChat, loadMessages, myChats } from "../../api/chatApi.js";
 import { getAllUsers } from "../../api/userApi";
-import { sendMessageAPI, deleteMessageAPI, editMessageAPI } from "../../api/messageApi";
+import {
+  sendMessageAPI,
+  deleteMessageAPI,
+  editMessageAPI,
+  deleteMessageForMeAPI,
+  forwardMessageAPI,
+  seenAPI,
+} from "../../api/messageApi";
 import MessageItem from "../../components/MessageItem";
 import FilePreview from "../../components/FilePreview";
 import { AuthContext } from "../../context/AuthContext";
 import { SocketContext } from "../../context/SocketContext";
 import "../../styles/ChatWindow.css";
 
-export default function ChatWindow() {
-  const { id } = useParams();
+export default function ChatWindow({ selectedUser }) {
+  const params = useParams();
+  const id = selectedUser || params.id;
+  const navigate = useNavigate();
   const [isGroup, setIsGroup] = useState(false);
   const [groupInfo, setGroupInfo] = useState(null);
   const { user } = useContext(AuthContext);
-  const { socket } = useContext(SocketContext);
+  const { socket, onlineUsers } = useContext(SocketContext);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [file, setFile] = useState(null);
@@ -33,6 +41,26 @@ export default function ChatWindow() {
   // Selected message for header actions
   const [selectedMsg, setSelectedMsg] = useState(null);
 
+  // Handler: Forward message (from header)
+  const handleForwardMessage = async (e) => {
+    if (e) e.preventDefault();
+    if (!selectedMsg) return;
+    const targetUserId = window.prompt(
+      "Enter the user ID to forward this message to:",
+    );
+    if (!targetUserId) return;
+    try {
+      await forwardMessageAPI({
+        receiverId: targetUserId,
+        messageId: selectedMsg._id,
+      });
+      alert("Message forwarded!");
+      setSelectedMsg(null);
+    } catch (err) {
+      alert("Failed to forward message");
+    }
+  };
+
   // Handler: Edit message (from header)
   const handleEditMessage = (e) => {
     if (e) e.preventDefault();
@@ -46,13 +74,32 @@ export default function ChatWindow() {
   const handleDeleteMessage = async (e) => {
     if (e) e.preventDefault();
     if (!selectedMsg) return;
-    if (!window.confirm("Delete this message?")) return;
-    try {
-      await deleteMessageAPI(selectedMsg._id);
-      setMessages((prev) => prev.filter((m) => m._id !== selectedMsg._id));
-      setSelectedMsg(null);
-    } catch (err) {
-      alert("Failed to delete message");
+    const action = window.prompt(
+      "Type 1 to delete for everyone, 2 to delete for me only:",
+    );
+    if (action === "1") {
+      if (!window.confirm("Delete this message for everyone?")) return;
+      try {
+        await deleteMessageAPI(selectedMsg._id);
+        setMessages((prev) => prev.filter((m) => m._id !== selectedMsg._id));
+        setSelectedMsg(null);
+      } catch (err) {
+        alert("Failed to delete message");
+      }
+    } else if (action === "2") {
+      try {
+        await deleteMessageForMeAPI(selectedMsg._id);
+        setMessages((prev) =>
+          prev.map((m) =>
+            m._id === selectedMsg._id
+              ? { ...m, deletedFor: [...(m.deletedFor || []), user._id] }
+              : m,
+          ),
+        );
+        setSelectedMsg(null);
+      } catch (err) {
+        alert("Failed to delete message for you");
+      }
     }
   };
 
@@ -69,6 +116,12 @@ export default function ChatWindow() {
           setChatId(group._id);
           setChatUser(null);
           socket.emit("join", { chatId: group._id });
+          // Mark group messages as delivered for this user
+          try {
+            await api.put(`/messages/delivered/${group._id}`);
+          } catch (err) {
+            // Ignore errors
+          }
         } else {
           setIsGroup(false);
           setGroupInfo(null);
@@ -100,7 +153,6 @@ export default function ChatWindow() {
     };
   }, [socket, id, user]);
 
-  // Re-join chat room if socket reconnects (ensures group messages always received)
   useEffect(() => {
     if (!socket || !chatId) return;
     const handleReconnect = () => {
@@ -129,24 +181,36 @@ export default function ChatWindow() {
   }, [socket, chatId, user]);
 
   useEffect(() => {
+    let didCancel = false;
     const fetchMessages = async () => {
       setLoading(true);
       try {
         // For group, fetch messages by groupId, for user, by userId
         const fetchId = id;
         const { data } = await loadMessages(fetchId);
-        setMessages(Array.isArray(data) ? data : []);
+        if (!didCancel) setMessages(Array.isArray(data) ? data : []);
         // Mark as seen for personal chat
         if (!isGroup && user && id) {
           await seenAPI({ senderId: id });
         }
       } catch {
-        setMessages([]);
+        if (!didCancel) setMessages([]);
       } finally {
-        setLoading(false);
+        if (!didCancel) setLoading(false);
       }
     };
     fetchMessages();
+
+    const handleFocus = async () => {
+      if (!isGroup && user && id) {
+        await seenAPI({ senderId: id });
+      }
+    };
+    window.addEventListener("focus", handleFocus);
+    return () => {
+      didCancel = true;
+      window.removeEventListener("focus", handleFocus);
+    };
   }, [id, isGroup, user]);
 
   useEffect(() => {
@@ -154,13 +218,25 @@ export default function ChatWindow() {
     const handleReceiveMessage = (msg) => {
       const normalizedMsg = {
         ...msg,
-        senderId: typeof msg.senderId === 'object' && msg.senderId !== null ? msg.senderId._id : msg.senderId,
-        receiverId: typeof msg.receiverId === 'object' && msg.receiverId !== null ? msg.receiverId._id : msg.receiverId,
-        groupId: typeof msg.groupId === 'object' && msg.groupId !== null ? msg.groupId._id : msg.groupId,
+        senderId:
+          typeof msg.senderId === "object" && msg.senderId !== null
+            ? msg.senderId._id
+            : msg.senderId,
+        receiverId:
+          typeof msg.receiverId === "object" && msg.receiverId !== null
+            ? msg.receiverId._id
+            : msg.receiverId,
+        groupId:
+          typeof msg.groupId === "object" && msg.groupId !== null
+            ? msg.groupId._id
+            : msg.groupId,
       };
       // For group chat, check groupId; for personal chat, check sender/receiver
       const isGroupMsg = isGroup && normalizedMsg.groupId === id;
-      const isPersonalMsg = !isGroup && ((normalizedMsg.senderId && normalizedMsg.senderId === id) || (normalizedMsg.receiverId && normalizedMsg.receiverId === id));
+      const isPersonalMsg =
+        !isGroup &&
+        ((normalizedMsg.senderId && normalizedMsg.senderId === id) ||
+          (normalizedMsg.receiverId && normalizedMsg.receiverId === id));
       if (isGroupMsg || isPersonalMsg) {
         setMessages((prev) => {
           if (prev.some((m) => m._id === normalizedMsg._id)) return prev;
@@ -181,9 +257,15 @@ export default function ChatWindow() {
     };
     socket.on("receiveMessage", handleReceiveMessage);
     socket.on("messagesSeen", handleMessagesSeen);
+    // Real-time delete for everyone
+    const handleMessageDeleted = (deletedId) => {
+      setMessages((prev) => prev.filter((m) => m._id !== deletedId));
+    };
+    socket.on("messageDeleted", handleMessageDeleted);
     return () => {
       socket.off("receiveMessage", handleReceiveMessage);
       socket.off("messagesSeen", handleMessagesSeen);
+      socket.off("messageDeleted", handleMessageDeleted);
     };
   }, [socket, id]);
 
@@ -199,8 +281,12 @@ export default function ChatWindow() {
     if (editingMsg) {
       console.log("[Edit API] editingMsg:", editingMsg);
       try {
-        const { data } = await editMessageAPI(editingMsg._id, { message: input });
-        setMessages((prev) => prev.map((m) => m._id === editingMsg._id ? data.message : m));
+        const { data } = await editMessageAPI(editingMsg._id, {
+          message: input,
+        });
+        setMessages((prev) =>
+          prev.map((m) => (m._id === editingMsg._id ? data.message : m)),
+        );
         setEditingMsg(null);
         setInput("");
         setFile(null);
@@ -213,26 +299,43 @@ export default function ChatWindow() {
     // Bot chat logic
     if (id === "bot") {
       console.log("[BOT] Sending message to bot:", input);
-      setMessages(prev => {
-        const updated = [...prev, { sender: "me", message: input, messageType: "text" }];
+      setMessages((prev) => {
+        const updated = [
+          ...prev,
+          { sender: "me", message: input, messageType: "text" },
+        ];
         return updated;
       });
       try {
         const res = await api.post("/bot/message", { message: input });
         console.log("[BOT] API response:", res);
         const botReply = res?.data?.reply?.trim();
-        setMessages(prev => {
-          const updated = [...prev, {
-            sender: "bot",
-            message: botReply && botReply !== "" ? botReply : "Sorry, I could not process that right now. Please try again.",
-            messageType: "text"
-          }];
+        setMessages((prev) => {
+          const updated = [
+            ...prev,
+            {
+              sender: "bot",
+              message:
+                botReply && botReply !== ""
+                  ? botReply
+                  : "Sorry, I could not process that right now. Please try again.",
+              messageType: "text",
+            },
+          ];
           return updated;
         });
       } catch (err) {
         console.error("[BOT] API error:", err);
-        setMessages(prev => {
-          const updated = [...prev, { sender: "bot", message: "Sorry, I could not process that right now. Please try again.", messageType: "text" }];
+        setMessages((prev) => {
+          const updated = [
+            ...prev,
+            {
+              sender: "bot",
+              message:
+                "Sorry, I could not process that right now. Please try again.",
+              messageType: "text",
+            },
+          ];
           return updated;
         });
       }
@@ -255,7 +358,9 @@ export default function ChatWindow() {
       if (data && data.message) {
         setMessages((prev) => {
           // Remove any placeholder file message (with no _id) before adding the real one
-          const filtered = prev.filter((m) => m._id || m.messageType !== "file");
+          const filtered = prev.filter(
+            (m) => m._id || m.messageType !== "file",
+          );
           if (filtered.some((m) => m._id === data.message._id)) return filtered;
           return [...filtered, data.message];
         });
@@ -281,25 +386,83 @@ export default function ChatWindow() {
     const diff = Math.floor((now - date) / 60000); // minutes
     if (diff < 1) return "just now";
     if (diff < 60) return `${diff} min ago`;
-    if (diff < 1440) return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    if (diff < 1440)
+      return date.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
     return date.toLocaleDateString();
   };
 
   return (
     <div className="chat-window-container">
       <div className="chat-window-header chat-window-header-flex">
-        <div>{isGroup && groupInfo ? groupInfo.name : chatUser ? chatUser.name : "Chat"}</div>
+        <button
+          className="chat-back-btn"
+          onClick={() => {
+            if (isGroup) {
+              navigate("/groups");
+            } else {
+              navigate("/users");
+            }
+          }}
+          title="Back"
+        >
+          <i className="ri-arrow-left-line"></i>
+        </button>
+        <div>
+          {isGroup && groupInfo
+            ? groupInfo.name
+            : chatUser
+              ? chatUser.name
+              : "Chat"}
+        </div>
         <div className="chat-header-right">
           {chatUser && !chatUser.isBot && (
             <div className="chat-header-lastseen">
-              {chatUser.isOnline ? "Online" : chatUser.lastSeen ? `Last seen: ${formatLastSeen(chatUser.lastSeen)}` : "Offline"}
+              {String(chatUser._id) === String(user._id)
+                ? onlineUsers && onlineUsers.includes(String(user._id))
+                  ? "Online"
+                  : chatUser.lastSeen
+                    ? `Last seen: ${formatLastSeen(chatUser.lastSeen)}`
+                    : "Offline"
+                : onlineUsers && onlineUsers.includes(String(chatUser._id))
+                  ? "Online"
+                  : chatUser.lastSeen
+                    ? `Last seen: ${formatLastSeen(chatUser.lastSeen)}`
+                    : "Offline"}
             </div>
           )}
           {selectedMsg && (
             <div className="chat-header-actions">
-              <button className="chat-header-btn edit" onClick={handleEditMessage}>✏️</button>
-              <button className="chat-header-btn delete" onClick={handleDeleteMessage}>🗑️</button>
-              <button className="chat-header-btn cancel" onClick={() => setSelectedMsg(null)}>❌</button>
+              <button
+                className="chat-header-btn edit"
+                onClick={handleEditMessage}
+                title="Edit"
+              >
+                <i className="ri-edit-2-line"></i>
+              </button>
+              <button
+                className="chat-header-btn delete"
+                onClick={handleDeleteMessage}
+                title="Delete"
+              >
+                <i className="ri-delete-bin-6-line"></i>
+              </button>
+              <button
+                className="chat-header-btn forward"
+                onClick={handleForwardMessage}
+                title="Forward"
+              >
+                <i className="ri-share-forward-line"></i>
+              </button>
+              <button
+                className="chat-header-btn cancel"
+                onClick={() => setSelectedMsg(null)}
+                title="Cancel"
+              >
+                <i className="ri-close-line"></i>
+              </button>
             </div>
           )}
         </div>
@@ -310,23 +473,35 @@ export default function ChatWindow() {
         ) : messages.length === 0 ? (
           <div>No messages yet. Say hello!</div>
         ) : (
-          messages.map((msg, idx) => {
-            const isMine = msg.sender === "me" || String((msg.senderId && msg.senderId._id) ? msg.senderId._id : msg.senderId) === String(user?._id);
-            const isSelected = selectedMsg && selectedMsg._id === msg._id;
-            return (
-              <div
-                key={msg._id || msg.id || msg.sender+"-"+idx}
-                className={`chat-message-row${isMine ? " mine" : ""}${isSelected ? " selected-message" : ""}`}
-                onClick={() => isMine && setSelectedMsg(isSelected ? null : msg)}
-              >
-                <MessageItem
-                  msg={msg}
-                  isMine={isMine}
-                  isSelected={isSelected}
-                />
-              </div>
-            );
-          })
+          messages
+            .filter(
+              (msg) =>
+                !Array.isArray(msg.deletedFor) ||
+                !msg.deletedFor.includes(user?._id),
+            )
+            .map((msg, idx) => {
+              const isMine =
+                msg.sender === "me" ||
+                String(
+                  msg.senderId && msg.senderId._id
+                    ? msg.senderId._id
+                    : msg.senderId,
+                ) === String(user?._id);
+              const isSelected = selectedMsg && selectedMsg._id === msg._id;
+              return (
+                <div
+                  key={msg._id || msg.id || msg.sender + "-" + idx}
+                  className={`chat-message-row${isMine ? " mine" : ""}${isSelected ? " selected-message" : ""}`}
+                  onClick={() => setSelectedMsg(isSelected ? null : msg)}
+                >
+                  <MessageItem
+                    msg={msg}
+                    isMine={isMine}
+                    isSelected={isSelected}
+                  />
+                </div>
+              );
+            })
         )}
         {isTyping && <div className="typing-indicator">typing...</div>}
         <div ref={messagesEndRef} />
@@ -340,14 +515,11 @@ export default function ChatWindow() {
         />
         <input
           type="file"
-          style={{ display: "none" }}
+          className="chat-file-input"
           id="file-upload"
           onChange={(e) => setFile(e.target.files[0])}
         />
-        <label
-          htmlFor="file-upload"
-          className="file-upload-label"
-        >
+        <label htmlFor="file-upload" className="file-upload-label">
           📎
         </label>
         <button type="submit">Send</button>

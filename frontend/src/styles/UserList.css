@@ -1,3 +1,18 @@
+.user-seen-icon {
+  color: #2196f3;
+  margin-left: 4px;
+}
+.user-delivered-icon {
+  color: #888;
+  margin-left: 4px;
+}
+.user-sent-icon {
+  color: #888;
+  margin-left: 4px;
+}
+.ai-chatbot-only .user-list-item:not(.ai-chatbot-fixed) {
+  display: none !important;
+}
 .ai-chatbot-fixed {
   background: #f5f5f5;
   font-weight: bold;
@@ -15,6 +30,15 @@
   border-radius: 1.2rem;
   box-shadow: 0 4px 24px 0 rgba(80, 112, 255, 0.08);
   overflow: hidden;
+}
+
+.user-last-message {
+  font-size: 0.80rem;
+  color: #666;
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .user-list-header {

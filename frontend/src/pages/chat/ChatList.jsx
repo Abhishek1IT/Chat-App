@@ -3,7 +3,7 @@ import { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { getAllUsers } from "../../api/userApi";
 import { AuthContext } from "../../context/AuthContext";
-import { myChats } from "../../api/chatApi";
+import { myChats } from "../../api/chatApi.js";
 import "../../styles/ChatList.css";
 
 export default function ChatList() {
@@ -17,7 +17,7 @@ export default function ChatList() {
     const fetchUsers = async () => {
       try {
         const { data } = await getAllUsers();
-        setUsers((data?.users || []).filter((u) => u._id !== user._id));
+        setUsers((data?.users || []).filter((u) => String(u._id) !== String(user._id)));
       } catch (err) {
         setUsers([]);
       } finally {
@@ -68,6 +68,24 @@ export default function ChatList() {
             >
               <div className="chat-list-avatar">{u.name[0]}</div>
               <div className="chat-list-name">{u.name}</div>
+              {u.lastMessage && (
+                <div className="chat-list-last-message">
+                  <span className="chat-list-last-message-text">{u.lastMessage}</span>
+                  {u.lastMessageType === "text" && (
+                    <span className="chat-list-last-message-status">
+                      {u.lastMessageSenderId === user._id && (
+                        u.lastMessageStatus === "seen" ? (
+                          <span className="chat-seen-icon">✔✔</span>
+                        ) : u.lastMessageStatus === "delivered" ? (
+                          <span className="chat-delivered-icon">✔✔</span>
+                        ) : (
+                          <span className="chat-sent-icon">✔</span>
+                        )
+                      )}
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
           ))
         )}

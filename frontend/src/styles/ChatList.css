@@ -1,3 +1,37 @@
+.chat-seen-icon {
+  color: #2196f3;
+  margin-left: 4px;
+}
+.chat-delivered-icon {
+  color: #888;
+  margin-left: 4px;
+}
+.chat-sent-icon {
+  color: #888;
+  margin-left: 4px;
+}
+.chat-list-last-message {
+  font-size: 0.85rem;
+  color: #666;
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.chat-list-last-message-text {
+  font-size: 0.85rem;
+  color: #666;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+}
+
+.chat-list-last-message-status {
+  font-size: 0.9em;
+  margin-left: 2px;
+}
 .chat-list-container {
   max-width: 400px;
   margin: 40px auto;

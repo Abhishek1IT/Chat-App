@@ -1,6 +1,6 @@
 import { createContext, useEffect, useState } from "react";
 import { getToken, removeToken, setToken } from "../utils/storage";
-import { profileUser } from "../api/authApi.js";
+import { profileUser } from "../api/userApi.js";
 
 export const AuthContext = createContext();
 

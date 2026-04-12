@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../context/AuthContext.jsx";
-import { profileUser } from "../../api/authApi.js";
+import { profileUser } from "../../api/userApi.js";
 import { removeToken } from "../../utils/storage.js";
 import { useNavigate } from "react-router-dom";
 import "../../styles/Profile.css";
@@ -42,6 +42,13 @@ export default function Profile() {
     );
   return (
     <div className="profile-container">
+      <button
+        className="chat-back-btn"
+        onClick={() => navigate("/users")}
+        title="Back"
+      >
+        <i className="ri-arrow-left-line"></i>
+      </button>
       <h2 className="profile-title">Profile</h2>
       <p className="profile-field">
         <strong>Name:</strong> {user?.name}

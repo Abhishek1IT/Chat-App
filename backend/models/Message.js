@@ -34,25 +34,34 @@ const messageSchema = new mongoose.Schema(
       default: "",
     },
 
+
     status: {
       type: String,
       enum: ["sent", "delivered", "seen"],
       default: "sent",
     },
 
-    deliveredAt: {
-      type: Date,
-    },
-
-    seenAt: {
-      type: Date,
-    },
-
+    deliveredTo: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: [],
+    }],
+    seenBy: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: [],
+    }],
+    
     isedited: {
       type: Boolean,
       default: false,
     },
-    
+    deletedFor: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: [],
+    }],
+
   },
   {
     timestamps: true,

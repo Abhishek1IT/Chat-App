@@ -1,3 +1,6 @@
+.gm-add-user-btn-wrapper {
+  margin: 10px 0 0 0;
+}
 /* WhatsApp-like Group Manager Styles */
 .group-manager-container {
   background: #f7f9fa;
@@ -253,4 +256,23 @@
 }
 .gm-open-chat:hover {
   background: #20b858;
+}
+
+/* Back button for group manager */
+.chat-back-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 22px;
+  color: #2196f3;
+  padding: 4px 8px 4px 0;
+  margin-right: 8px;
+  display: inline-flex;
+  align-items: center;
+  transition: background 0.2s, color 0.2s;
+}
+.chat-back-btn:hover {
+  background: #e3f2fd;
+  color: #1565c0;
+  border-radius: 50%;
 }

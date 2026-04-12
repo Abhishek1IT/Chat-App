@@ -1,6 +1,13 @@
 import "../styles/ChatWindow.css";
 
+import { useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
+
 export default function MessageItem({ msg, isMine, isSelected }) {
+  const { user } = useContext(AuthContext);
+  if (Array.isArray(msg.deletedFor) && user && msg.deletedFor.includes(user._id)) {
+    return null;
+  }
   const fileName =
     msg.fileName ||
     msg.originalName ||

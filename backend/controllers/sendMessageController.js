@@ -1,6 +1,7 @@
 import { getIO, getUsers } from "../socket/socket.js";
 import Message from "../models/Message.js";
 import Chat from "../models/Chat.js";
+import e from "cors";
 
 export const sendMessage = async (req, res) => {
   try {
@@ -88,7 +89,6 @@ export const sendMessage = async (req, res) => {
           });
         }
       });
-
     } else {
       if (users[receiverId]) {
         users[receiverId].forEach((socketId) => {
@@ -96,12 +96,11 @@ export const sendMessage = async (req, res) => {
         });
 
         newMessage.status = "delivered";
-        newMessage.deliveredAt = new Date();
+        newMessage.deliveredTo.push(senderId);
         await newMessage.save();
       }
     }
 
-    // SEND TO SENDER AS WELL
     if (users[senderId]) {
       users[senderId].forEach((socketId) => {
         io.to(socketId).emit("receiveMessage", populatedMessage);
@@ -109,7 +108,6 @@ export const sendMessage = async (req, res) => {
     }
 
     return res.status(201).json({ message: populatedMessage });
-
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: error.message });
@@ -146,6 +144,28 @@ export const markAsSeen = async (req, res) => {
     }
 
     res.json({ message: "Messages marked as seen" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const groupChatDelivered = async (req, res) => {
+  try {
+    const groupId = req.params.id;
+    const userId = req.user._id;
+
+    const result = await Message.updateMany(
+      {
+        receiverId: groupId,
+        deliveredTo: { $ne: userId },
+      },
+      {
+        $addToSet: { deliveredTo: userId },
+      },
+    );
+
+    // Always return success, even if nothing was updated (idempotent)
+    res.json({ message: "Messages marked as delivered", matchedCount: result.matchedCount, modifiedCount: result.modifiedCount });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -260,7 +280,8 @@ export const forwardMessage = async (req, res) => {
     }
 
     chat.lastMessage = newMessage._id;
-    chat.lastMessageText = newMessage.message || (newMessage.fileUrl ? "File" : "");
+    chat.lastMessageText =
+      newMessage.message || (newMessage.fileUrl ? "File" : "");
     chat.lastMessageTime = new Date();
     await chat.save();
 
@@ -270,6 +291,37 @@ export const forwardMessage = async (req, res) => {
     ]);
 
     res.json({ message: populatedMessage });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Delete message for me (per user)
+export const deleteMessageForMe = async (req, res) => {
+  try {
+    const io = getIO();
+    const users = getUsers();
+
+    const userId = req.user._id;
+    const messageId = req.params.id;
+    const message = await Message.findById(messageId);
+    if (!message) {
+      return res.status(404).json({ message: "Message not found" });
+    }
+    // Already deleted for this user
+    if (message.deletedFor.includes(userId)) {
+      return res.status(200).json({ message: "Already deleted for this user" });
+    }
+    message.deletedFor.push(userId);
+    await message.save();
+
+    if (users[userId]) {
+      users[userId].forEach((socketId) => {
+        io.to(socketId).emit("messageDeletedForMe", messageId);
+      });
+    }
+
+    return res.json({ message: "Message deleted for me" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

@@ -4,6 +4,7 @@ import sendMessageRoutes from "./routes/sendmessageRoute.js";
 import forgotPassRoutes from "./routes/frogotPassRoute.js";
 import chatRoutes from "./routes/chatRoute.js";
 import botRoutes from "./routes/botRoute.js";
+import userRoutes from "./routes/userRoute.js";
 import path from "path";
 import cors from "cors";
 
@@ -21,6 +22,7 @@ app.use("/api/messages", sendMessageRoutes);
 app.use("/api/password", forgotPassRoutes);
 app.use("/api/chats", chatRoutes);
 app.use("/api/bot", botRoutes);
+app.use("/api/users", userRoutes);
 
 app.get("/", (_req, res) => {
   res.status(200).json({ message: "Chat API is running" });

@@ -1,6 +1,9 @@
 import api from "./axios";
 
-// Use relative path, since axios baseURL is already /api
 export const getAllUsers = () => {
-  return api.get("auth/users");
+  return api.get("/users/all-with-last-message");
+};
+
+export const profileUser = () => {
+  return api.get("/auth/profile");
 };

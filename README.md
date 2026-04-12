@@ -15,7 +15,7 @@ This project is a full-stack real-time chat application with:
 ---
 
 ## API Endpoints & Capabilities
-
+**Note:** All routes marked "requires login" need a valid JWT token in the `Authorization` header as `Bearer <token>`. If you get a 401 error, make sure you are logged in and your frontend is sending the token with every request.
 ### User & Auth APIs (`/api/auth`)
 - **POST `/register`** — Register a new user.
 - **POST `/login`** — Login and get a JWT token.
@@ -57,14 +57,9 @@ This project is a full-stack real-time chat application with:
 - Create group chats, add/remove users (admin only), assign/remove admin rights
 - Only group admins can delete a group or manage other users in the group
 - Send, edit, and delete messages (including files/images/videos)
-See real-time typing indicators and message delivery status (✔, ✔✔, blue ✔✔)
-
-**Message Status Ticks Explained:**
-- ✔ (Single tick): Message sent from your device to the server.
-- ✔✔ (Double tick): Message delivered to the recipient's device (received by the other user or group members).
-- ✔✔ (Blue double tick): Message has been seen/read by the recipient (or all group members). The tick turns blue only after the other user (or all group members) open the chat and the message is marked as seen.
+- See real-time typing indicators and message delivery status (✔, ✔✔, blue ✔✔)
 - See last seen/online status for users
-See last seen/online status for users
+- Reset password via email if forgotten
 - Chat with the built-in AI chatbot (Gemini) at any time
 - Enjoy a WhatsApp-like UI for group management and chat
 
@@ -214,3 +209,19 @@ REACT_APP_API_URL=/api
 - The AI Chatbot is always available at the top of the Users list after login
 - Only the group admin can delete a group; regular users cannot delete groups
 - All new UI/UX improvements, message status, last seen, and group management features are included
+
+---
+
+## Troubleshooting
+
+**401 Unauthorized errors:**
+- Make sure you are logged in and have a valid JWT token.
+- The frontend must send the token in the `Authorization` header for all protected API requests.
+- If you log out or the token expires, log in again to get a new token.
+- Check your browser's localStorage for a `token` key after login.
+- If you change backend or frontend ports, update your `.env` files accordingly.
+
+**Frontend/Backend URL issues:**
+- Always access the frontend via `http://localhost:3000` (not as a file or error page).
+- The backend should run on `http://localhost:5000` (or your configured port).
+- The reset password link in emails should match your running frontend URL.

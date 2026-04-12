@@ -8,7 +8,7 @@ import {
   adminRemoveUser,
   leaveGroup,
   deleteGroup,
-} from "../../api/chatApi";
+} from "../../api/chatApi.js";
 import { getAllUsers } from "../../api/userApi";
 import CreateGroupModal from "../../components/CreateGroupModal";
 import AddUserModal from "../../components/AddUserModal";
@@ -143,6 +143,13 @@ export default function GroupManager() {
   return (
     <div className="group-manager-container">
       <div className="group-manager-header">
+        <button
+          className="chat-back-btn"
+          onClick={() => navigate("/users")}
+          title="Back"
+        >
+          <i className="ri-arrow-left-line"></i>
+        </button>
         <h2>Group Manager</h2>
         <button className="gm-create-btn" onClick={() => setShowCreate(true)}>
           <span>＋</span> Create Group
@@ -187,7 +194,7 @@ export default function GroupManager() {
               Delete Group
             </button>
           </div>
-          <div style={{ margin: '10px 0 0 0' }}>
+          <div className="gm-add-user-btn-wrapper">
             <button className="gm-btn gm-add-user" onClick={() => setShowAddUser(true)}>
               Add User
             </button>
